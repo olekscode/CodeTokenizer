@@ -1,14 +1,14 @@
 Class {
-	#name : #SourceCodeTokenizer,
+	#name : #PharoCodeTokenizer,
 	#superclass : #Object,
 	#category : #CodeTokenizer
 }
 
 { #category : #parsing }
-SourceCodeTokenizer >> tokenize: aMethod [
+PharoCodeTokenizer >> tokenize: aMethod [
 
 	| visitor nameTokenizer |
-	visitor := TokenizingVisitor new.
+	visitor := PharoTokenizingVisitor new.
 	aMethod ast acceptVisitor: visitor.
 	
 	"^ visitor tokens."
