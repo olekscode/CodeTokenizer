@@ -58,7 +58,18 @@ JavaTokenizingVisitorTest >> testArray [
 		double scores[ ] = {80,90};
 		double grades[ ];
 		grades[7] = 85; '.
-	expectedTokens := #({ double grades '[' ']' = new double '[' '<num>' ']' ; double scores '[' ']' = { '<num>' , '<num>' } ; double grades '[' ']' ; grades '[' 7 ']' = '<num>' ; }).
+	expectedTokens := #({ double grades '[' ']' = new double '[' '<num>' ']' ; double scores '[' ']' = { '<num>' , '<num>' } ; double grades '[' ']' ; grades '[' '<num>' ']' = '<num>' ; }).
+	
+	tokens := self tokenize: source.
+	self assert: tokens equals: expectedTokens.
+]
+
+{ #category : #'as yet unclassified' }
+JavaTokenizingVisitorTest >> testAssignment [
+	| source tokens expectedTokens |
+	
+	source := 'x = 2;'.
+	expectedTokens := #({ x = '<num>' ; }).
 	
 	tokens := self tokenize: source.
 	self assert: tokens equals: expectedTokens.
@@ -79,7 +90,7 @@ JavaTokenizingVisitorTest >> testBigSwitch [
                     default:
                         throw new AssertionError();
                 }'.
-	expectedTokens := #({ switch '(' '(' ' (' CollectionType ')' receiver . type ')' . kind ')' { case LIST : return new Lists . Marker '(' bindIndex , receiver ')' ; case SET : return new Sets . Marker '(' bindIndex , receiver ')' ; case MAP : return new Maps . Marker '(' bindIndex , receiver ')' ; default : throw new AssertionError '(' ')' ; } }).
+	expectedTokens := #({ switch '(' '(' '(' CollectionType ')' receiver . type ')' . kind ')' { case LIST : return new Lists . Marker '(' bindIndex , receiver ')' ; case SET : return new Sets . Marker '(' bindIndex , receiver ')' ; case MAP : return new Maps . Marker '(' bindIndex , receiver ')' ; default : throw new AssertionError '(' ')' ; } }).
 	
 	tokens := self tokenize: source.
 	self assert: tokens equals: expectedTokens.
@@ -288,6 +299,17 @@ JavaTokenizingVisitorTest >> testNewOneArg [
 ]
 
 { #category : #'as yet unclassified' }
+JavaTokenizingVisitorTest >> testParentheses [
+	| source tokens expectedTokens |
+	
+	source := 'return (1 + 2) * 3;'.
+	expectedTokens := #({ return '(' '<num>' + '<num>' ')' * '<num>' ; }).
+	
+	tokens := self tokenize: source.
+	self assert: tokens equals: expectedTokens.
+]
+
+{ #category : #'as yet unclassified' }
 JavaTokenizingVisitorTest >> testPostDecrement [
 	| source tokens expectedTokens |
 	
@@ -343,6 +365,17 @@ JavaTokenizingVisitorTest >> testPrimitiveTypes [
 ]
 
 { #category : #'as yet unclassified' }
+JavaTokenizingVisitorTest >> testQualifiedTypeName [
+	| source tokens expectedTokens |
+	
+	source := 'return new Lists.Marker(bindIndex, receiver);'.
+	expectedTokens := #({ return new Lists . Marker '(' bindIndex , receiver ')' ; }).
+	
+	tokens := self tokenize: source.
+	self assert: tokens equals: expectedTokens.
+]
+
+{ #category : #'as yet unclassified' }
 JavaTokenizingVisitorTest >> testString [
 	| source tokens expectedTokens |
 	
@@ -392,6 +425,28 @@ JavaTokenizingVisitorTest >> testTryCatch [
 	
 	source := 'try { throw AssertError(); } catch(AssertError e) { System.out.println(e); }'.
 	expectedTokens := #({ try { throw AssertError '(' ')' ; } catch '(' AssertError e ')' { System . out . println '(' e ')' ; } }).
+	
+	tokens := self tokenize: source.
+	self assert: tokens equals: expectedTokens.
+]
+
+{ #category : #'as yet unclassified' }
+JavaTokenizingVisitorTest >> testTryCatchFinally [
+	| source tokens expectedTokens |
+	
+	source := 'try { throw AssertError(); } catch(AssertError e) { System.out.println(e); } finally { exit(); }'.
+	expectedTokens := #({ try { throw AssertError '(' ')' ; } catch '(' AssertError e ')' { System . out . println '(' e ')' ; } finally { exit '(' ')' ; } }).
+	
+	tokens := self tokenize: source.
+	self assert: tokens equals: expectedTokens.
+]
+
+{ #category : #'as yet unclassified' }
+JavaTokenizingVisitorTest >> testTryCatchMult [
+	| source tokens expectedTokens |
+	
+	source := 'try { throw AssertError(); } catch(AssertError|ValueError e) { System.out.println(e); }'.
+	expectedTokens := #({ try { throw AssertError '(' ')' ; } catch '(' AssertError | ValueError e ')' { System . out . println '(' e ')' ; } }).
 	
 	tokens := self tokenize: source.
 	self assert: tokens equals: expectedTokens.
@@ -478,7 +533,7 @@ JavaTokenizingVisitorTest >> testWhile [
 JavaTokenizingVisitorTest >> tokenize: sourceCode [
 	| method |
 	method := self createMethodNode: sourceCode.
-	"method body statements first inspect."
+"	method body statements inspect."
 	method acceptVisitor: visitor.
 	^ visitor tokens asArray.
 ]

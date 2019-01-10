@@ -18,10 +18,47 @@ JavaTokenizingVisitor >> tokens [
 ]
 
 { #category : #accessing }
+JavaTokenizingVisitor >> visitArrayAccess: anArrayAccess [
+	anArrayAccess array acceptVisitor: self.
+	tokens add: '['.
+	anArrayAccess expression acceptVisitor: self.
+	tokens add: ']'.
+]
+
+{ #category : #accessing }
+JavaTokenizingVisitor >> visitArrayInitializer: anArrayInitializer [
+	tokens add: '{'.
+	
+	anArrayInitializer initializers ifNotEmpty: [ 
+		1 to: anArrayInitializer initializers size - 1 do: [ :i |
+			(anArrayInitializer initializers at: i) acceptVisitor: self.
+			tokens add: ',' ].
+		
+		anArrayInitializer initializers last acceptVisitor: self ].
+	
+	tokens add: '}'.
+]
+
+{ #category : #accessing }
+JavaTokenizingVisitor >> visitArrayVariableName: anArrayVariableName [
+	anArrayVariableName variable acceptVisitor: self.
+	tokens add: '['; add: ']'.
+]
+
+{ #category : #accessing }
+JavaTokenizingVisitor >> visitAssignment: anAssignment [
+	anAssignment variable acceptVisitor: self.
+	tokens add: anAssignment op value.
+	anAssignment value acceptVisitor: self.
+]
+
+{ #category : #accessing }
 JavaTokenizingVisitor >> visitBinaryExpression: aBinaryExpression [
+	aBinaryExpression _leftParens do: [ :each | tokens add: each value ].
 	aBinaryExpression leftExpression acceptVisitor: self.
 	tokens add: aBinaryExpression op value.
 	aBinaryExpression rightExpression acceptVisitor: self.
+	aBinaryExpression _rightParens do: [ :each | tokens add: each value ].
 ]
 
 { #category : #accessing }
@@ -41,10 +78,30 @@ JavaTokenizingVisitor >> visitBooleanLiteral: aBooleanLiteral [
 
 { #category : #accessing }
 JavaTokenizingVisitor >> visitCastExpression: aCastExpression [
+	aCastExpression _leftParens do: [ :each | tokens add: each value ].
 	tokens add: '('.
 	aCastExpression type acceptVisitor: self.
 	tokens add: ')'.
 	aCastExpression expression acceptVisitor: self.
+	aCastExpression _rightParens do: [ :each | tokens add: each value ].
+]
+
+{ #category : #accessing }
+JavaTokenizingVisitor >> visitCatchClause: aCatchClause [
+	tokens add: 'catch'; add: '('.
+	aCatchClause parameter acceptVisitor: self.
+	tokens add: ')'.
+	aCatchClause block acceptVisitor: self.
+]
+
+{ #category : #accessing }
+JavaTokenizingVisitor >> visitCatchParameter: aCatchParameter [
+	1 to: aCatchParameter types size - 1 do: [ :i |
+		(aCatchParameter types at: i) acceptVisitor: self.
+		tokens add: '|' ].
+	
+	aCatchParameter types last acceptVisitor: self.
+	aCatchParameter variable acceptVisitor: self.
 ]
 
 { #category : #accessing }
@@ -69,6 +126,12 @@ JavaTokenizingVisitor >> visitExpressionStatement: anExpressionStatement [
 JavaTokenizingVisitor >> visitFieldAccess: aFieldAccess [
 	aFieldAccess receiver acceptVisitor: self.
 	tokens add: '.'; add: aFieldAccess name value.
+]
+
+{ #category : #accessing }
+JavaTokenizingVisitor >> visitFinallyClause: aFinallyClause [
+	tokens add: 'finally'.
+	aFinallyClause block acceptVisitor: self.
 ]
 
 { #category : #accessing }
@@ -179,6 +242,22 @@ JavaTokenizingVisitor >> visitNew: aNew [
 ]
 
 { #category : #accessing }
+JavaTokenizingVisitor >> visitNewArray: aNewArray [
+	tokens add: 'new'.
+	aNewArray type acceptVisitor: self.
+	
+	aNewArray dimExpressions ifNotEmpty: [ 
+		tokens add: '['.
+		
+		1 to: aNewArray dimExpressions size - 1 do: [ :i |
+			(aNewArray dimExpressions at: i) acceptVisitor: self.
+			tokens add: ',' ].
+		
+		aNewArray dimExpressions last acceptVisitor: self.
+		tokens add: ']' ].
+]
+
+{ #category : #accessing }
 JavaTokenizingVisitor >> visitPostDecrementExpression: aPostDecrementExpression [
 	aPostDecrementExpression expression acceptVisitor: self.
 	tokens add: '--'.
@@ -209,7 +288,14 @@ JavaTokenizingVisitor >> visitPrimitiveType: aPrimitiveType [
 
 { #category : #accessing }
 JavaTokenizingVisitor >> visitQualifiedName: aQualifiedName [
-	tokens add: aQualifiedName nspace name value; add: '.'; add: aQualifiedName name value.
+	aQualifiedName nspace acceptVisitor: self.
+	tokens add: '.'; add: aQualifiedName name value.
+]
+
+{ #category : #accessing }
+JavaTokenizingVisitor >> visitQualifiedTypeName: aQualifiedTypeName [
+	aQualifiedTypeName nspace acceptVisitor: self.
+	tokens add: '.'; add: aQualifiedTypeName name value.
 ]
 
 { #category : #accessing }
@@ -263,6 +349,14 @@ JavaTokenizingVisitor >> visitThrowStatement: aThrowStatement [
 	tokens add: 'throw'.
 	aThrowStatement expression acceptVisitor: self.
 	tokens add: ';'.
+]
+
+{ #category : #accessing }
+JavaTokenizingVisitor >> visitTryStatement: aTryStatement [
+	tokens add: 'try'.
+	aTryStatement block acceptVisitor: self.
+	aTryStatement catches do: [ :each | each acceptVisitor: self ].
+	aTryStatement finally ifNotNil: [ aTryStatement finally acceptVisitor: self ].
 ]
 
 { #category : #accessing }
