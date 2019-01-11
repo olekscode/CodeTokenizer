@@ -124,7 +124,7 @@ JavaTokenizingVisitor >> visitExpressionStatement: anExpressionStatement [
 
 { #category : #accessing }
 JavaTokenizingVisitor >> visitFieldAccess: aFieldAccess [
-	aFieldAccess receiver acceptVisitor: self.
+	aFieldAccess receiver ifNotNil: [ aFieldAccess receiver acceptVisitor: self ].
 	tokens add: '.'; add: aFieldAccess name value.
 ]
 
@@ -228,7 +228,7 @@ JavaTokenizingVisitor >> visitName: aName [
 { #category : #accessing }
 JavaTokenizingVisitor >> visitNew: aNew [
 	tokens add: 'new'.
-	aNew type acceptVisitor: self.
+	aNew type ifNotNil: [ aNew type acceptVisitor: self ].
 	tokens add: '('.
 	
 	aNew expressions isNotEmpty ifTrue: [ 

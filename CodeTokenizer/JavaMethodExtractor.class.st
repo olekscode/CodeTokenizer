@@ -20,7 +20,7 @@ JavaMethodExtractor class >> getMethods: sourceCode [
 	
 	fileNode := JavaParser parse: sourceCode.
 	
-	declarationNodes := fileNode typeDeclarations flatCollect: #declarations.
+	declarationNodes := fileNode typeDeclarations flatCollect: [ :decl | (decl class = JavaEmptyDeclarationNode) ifTrue: [ OrderedCollection new ] ifFalse: [ decl declarations ] ].
 
 	flatDeclarations := declarationNodes flatCollect: [ :node |
 		node class = JavaClassDeclarationNode
