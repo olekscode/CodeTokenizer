@@ -142,11 +142,11 @@ JavaTokenizingVisitor >> visitFloatLiteral: aFloatLiteral [
 { #category : #accessing }
 JavaTokenizingVisitor >> visitForStatement: aForStatement [
 	tokens add: 'for'; add: '('.
-	aForStatement initial acceptVisitor: self.
+	aForStatement initial ifNotNil: [ aForStatement initial acceptVisitor: self ].
 	tokens add: ';'.
-	aForStatement test acceptVisitor: self.
+	aForStatement test ifNotNil: [ aForStatement test acceptVisitor: self ].
 	tokens add: ';'.
-	aForStatement _update acceptVisitor: self.
+	aForStatement _update ifNotNil: [ aForStatement _update acceptVisitor: self ].
 	tokens add: ')'.
 	aForStatement statement acceptVisitor: self.
 ]
