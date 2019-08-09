@@ -7,15 +7,19 @@ Class {
 { #category : #parsing }
 PharoCodeTokenizer >> tokenize: aMethod [
 
-	| visitor nameTokenizer |
+	| visitor |
 	visitor := PharoTokenizingVisitor new.
 	aMethod ast acceptVisitor: visitor.
 	
-	"^ visitor tokens."
-	
+	^ visitor tokens.
+]
+
+{ #category : #parsing }
+PharoCodeTokenizer >> tokenizeWithIdentifierNames: aMethod [
+	| nameTokenizer |
 	nameTokenizer := IdentifierNameTokenizer new.
 	
-	^ visitor tokens flatCollect: [ :token |
+	^ (self tokenize: aMethod) flatCollect: [ :token |
 		(token matchesRegex: '(\w|\:)+')
 			ifTrue: (nameTokenizer tokenize: token)
 			ifFalse: { token } ].
