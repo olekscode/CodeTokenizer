@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'nameTokenizer'
 	],
-	#category : #CodeTokenizer
+	#category : #'CodeTokenizer-Tests'
 }
 
 { #category : #running }

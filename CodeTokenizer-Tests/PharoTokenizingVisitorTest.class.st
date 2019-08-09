@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'anInstanceVariable'
 	],
-	#category : #CodeTokenizer
+	#category : #'CodeTokenizer-Tests'
 }
 
 { #category : #examples }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'visitor'
 	],
-	#category : #CodeTokenizer
+	#category : #'CodeTokenizer-Tests'
 }
 
 { #category : #'as yet unclassified' }
